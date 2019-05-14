@@ -3,6 +3,7 @@
 #start-containers: docker-compose --file zabbix-compose.yml start -d
 #zabbix-cli: https://github.com/usit-gd/zabbix-cli/blob/master/docs/manual.rst
 #zabbix-cli -c <config>
+#before run update: DB_SERVER_HOST, ZBX_SERVER_HOST
 version: '3.2'
 services:
 
