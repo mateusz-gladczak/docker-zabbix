@@ -26,7 +26,7 @@ services:
     image: zabbix/zabbix-server-mysql:latest
     restart: always
     environment: 
-      DB_SERVER_HOST: 192.168.100.150
+      DB_SERVER_HOST: 10.0.10.50
       MYSQL_USER: zabbix
       MYSQL_PASSWORD: zabbix
       ZBX_STARTDISCOVERERS: 3
@@ -58,10 +58,10 @@ services:
     image: zabbix/zabbix-web-nginx-mysql:latest
     restart: always
     environment:
-      DB_SERVER_HOST: 192.168.100.150
+      DB_SERVER_HOST: 10.0.10.50
       MYSQL_USER: zabbix
       MYSQL_PASSWORD: zabbix
-      ZBX_SERVER_HOST: 192.168.100.150
+      ZBX_SERVER_HOST: 10.0.10.50
       PHP_TZ: Europe/Warsaw
     depends_on:
       - zabbix-db
