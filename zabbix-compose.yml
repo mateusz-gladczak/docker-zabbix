@@ -1,0 +1,104 @@
+#create containers: docker-compose --file zabbix-compose.yml up
+#stop containers: docker-compose --file zabbix-compose.yml stop
+#start-containers: docker-compose --file zabbix-compose.yml start -d
+#zabbix-cli: https://github.com/usit-gd/zabbix-cli/blob/master/docs/manual.rst
+#zabbix-cli -c <config>
+version: '2.2'
+services:
+
+  zabbix-db:
+    image: mysql:latest
+    restart: always
+    environment:
+      DB_SERVER_HOST: zabbix-mysql
+      MYSQL_ROOT_PASSWORD: zabbix
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: zabbix
+      MYSQL_DATABASE: zabbix
+    volumes:
+      - /docker/volumes/mysql:/var/lib/mysql
+    ports:
+      - 3306:3306
+    container_name: zabbix-db
+
+  zabbix-server:
+    image: zabbix/zabbix-server-mysql:latest
+    restart: always
+    environment: 
+      DB_SERVER_HOST: 192.168.100.150
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: zabbix
+      ZBX_STARTDISCOVERERS: 3
+      ZBX_DEBUGLEVEL:
+      ZBX_STARTVMWARECOLLECTORS: 3
+      ZBX_VMWAREFREQUENCY: 60
+      ZBX_VMWAREPERFFREQUENCY: 60
+      ZBX_VMWARECACHESIZE: 8M
+      ZBX_VMWARETIMEOUT: 10
+      ZBX_ENABLE_SNMP_TRAPS: "true"
+    depends_on: 
+      - zabbix-db
+    volumes: 
+      - /docker/volumes/zabbix/alertscripts:/usr/lib/zabbix/alertscripts
+      - /docker/volumes/zabbix/externalscripts:/usr/lib/zabbix/externalscripts
+      - /docker/volumes/zabbix/modules:/var/lib/zabbix/modules
+      - /docker/volumes/zabbix/ssh_keys:/var/lib/zabbix/ssh_keys
+      - /docker/volumes/zabbix/ssl/certs:/var/lib/zabbix/ssl/certs
+      - /docker/volumes/zabbix/ssl/keys:/var/lib/zabbix/ssl/keys
+      - /docker/volumes/zabbix/ssl/ssl_ca:/var/lib/zabbix/ssl/ssl_ca
+      - /docker/volumes/zabbix/snmptraps:/var/lib/zabbix/snmptraps
+      - /docker/volume/zabbix/mibs:/var/lib/zabbix/mibs
+    ports:
+      #- 10050:10051
+      - 10051:10051
+    container_name: zabbix-server
+
+  zabbix-gui:
+    image: zabbix/zabbix-web-nginx-mysql:latest
+    restart: always
+    environment:
+      DB_SERVER_HOST: 192.168.100.150
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: zabbix
+      ZBX_SERVER_HOST: 192.168.100.150
+      PHP_TZ: Europe/Warsaw
+    depends_on:
+      - zabbix-db
+      - zabbix-server
+    ports:
+      - 8080:80
+      #- 8443:443
+    container_name: zabbix-gui
+
+  zabbix-agent:
+    user: root
+    privileged: true
+    pid: "host"
+    image: zabbix/zabbix-agent:latest
+    restart: always
+    environment:
+      #ZBX_SERVER_HOST: 192.168.100.150
+      ZBX_PASSIVESERVERS: 0.0.0.0/0
+      ZBX_PASSIVE_ALLOW: 'true'
+      ZBX_ACTIVE_ALLOW: 'true'
+    depends_on:
+      - zabbix-db
+      - zabbix-server
+    ports:
+      - 10050:10050
+    container_name: zabbix-agent
+
+  grafana:
+    image: monitoringartist/grafana-xxl:latest
+    restart: always
+    depends_on:
+      - zabbix-db
+      - zabbix-server
+    volumes:
+      - /docker/volumes/grafana:/var/lib/grafana
+    ports:
+      - 3000:3000
+    container_name: grafana
+
+
+
