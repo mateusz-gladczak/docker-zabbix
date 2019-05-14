@@ -3,7 +3,7 @@
 #start-containers: docker-compose --file zabbix-compose.yml start -d
 #zabbix-cli: https://github.com/usit-gd/zabbix-cli/blob/master/docs/manual.rst
 #zabbix-cli -c <config>
-version: '2.2'
+version: '3.2'
 services:
 
   zabbix-db:
@@ -17,6 +17,7 @@ services:
       MYSQL_DATABASE: zabbix
     volumes:
       - /docker/volumes/mysql:/var/lib/mysql
+    command: --character-set-server=utf8_bin --collation-server=utf8_bin
     ports:
       - 3306:3306
     container_name: zabbix-db
