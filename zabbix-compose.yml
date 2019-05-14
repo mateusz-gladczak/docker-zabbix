@@ -17,7 +17,7 @@ services:
       MYSQL_DATABASE: zabbix
     volumes:
       - /docker/volumes/mysql:/var/lib/mysql
-    command: --character-set-server=UTF8MB4 --collation-server=UTF8MB4 --default-authentication-plugin=mysql_native_password
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4 --default-authentication-plugin=mysql_native_password
     ports:
       - 3306:3306
     container_name: zabbix-db
